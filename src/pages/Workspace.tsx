@@ -20,7 +20,7 @@ export const Workspace: React.FC = () => {
     updateBlock,
     deleteBlock,
   } = useWorkspace();
-
+  
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Check if user is logged in (demo or real)
