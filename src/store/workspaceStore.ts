@@ -29,7 +29,9 @@ interface WorkspaceState {
   addBlock: (block: Block) => void;
   updateBlock: (blockId: string, updates: Partial<Block>) => void;
   deleteBlock: (blockId: string) => void;
+  reorderBlocks: (blocks: Block[]) => void; // ✅ added
   
+
   // UI State
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
@@ -83,6 +85,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     set((state) => ({
       blocks: state.blocks.filter((b) => b.id !== blockId),
     })),
+  reorderBlocks: (blocks) => set({ blocks }), // ✅ added
 
   // UI State
   sidebarOpen: true,

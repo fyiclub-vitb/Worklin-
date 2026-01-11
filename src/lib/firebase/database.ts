@@ -10,7 +10,6 @@ import {
   where,
   orderBy,
   onSnapshot,
-  Timestamp,
   serverTimestamp,
   writeBatch,
 } from 'firebase/firestore';
@@ -22,7 +21,8 @@ const WORKSPACES_COLLECTION = 'workspaces';
 const PAGES_COLLECTION = 'pages';
 const BLOCKS_COLLECTION = 'blocks';
 
-// Workspace operations
+/* ---------------- Workspace operations ---------------- */
+
 export const createWorkspace = async (userId: string, workspaceData: Partial<Workspace>) => {
   try {
     const workspaceRef = doc(db, WORKSPACES_COLLECTION);
@@ -79,7 +79,8 @@ export const subscribeToWorkspace = (
   });
 };
 
-// Page operations
+/* ---------------- Page operations ---------------- */
+
 export const createPage = async (workspaceId: string, pageData: Partial<Page>) => {
   try {
     const pageRef = doc(collection(db, PAGES_COLLECTION));
@@ -161,7 +162,8 @@ export const subscribeToPage = (pageId: string, callback: (page: any) => void) =
   });
 };
 
-// Block operations
+/* ---------------- Block operations ---------------- */
+
 export const createBlock = async (pageId: string, blockData: Partial<Block>) => {
   try {
     const blockRef = doc(collection(db, BLOCKS_COLLECTION));
@@ -169,6 +171,7 @@ export const createBlock = async (pageId: string, blockData: Partial<Block>) => 
       ...blockData,
       id: blockRef.id,
       pageId,
+      order: blockData.order ?? Date.now(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -184,7 +187,7 @@ export const getBlocksByPage = async (pageId: string) => {
     const q = query(
       collection(db, BLOCKS_COLLECTION),
       where('pageId', '==', pageId),
-      orderBy('createdAt', 'asc')
+      orderBy('order', 'asc')
     );
     const querySnapshot = await getDocs(q);
     const blocks = querySnapshot.docs.map((doc) => ({
@@ -220,16 +223,18 @@ export const deleteBlock = async (blockId: string) => {
   }
 };
 
-export const updateBlocksBatch = async (updates: Array<{ blockId: string; updates: Partial<Block> }>) => {
+export const reorderBlocks = async (pageId: string, orderedBlockIds: string[]) => {
   try {
     const batch = writeBatch(db);
-    updates.forEach(({ blockId, updates }) => {
+
+    orderedBlockIds.forEach((blockId, index) => {
       const blockRef = doc(db, BLOCKS_COLLECTION, blockId);
       batch.update(blockRef, {
-        ...updates,
+        order: index,
         updatedAt: serverTimestamp(),
       });
     });
+
     await batch.commit();
     return { error: null };
   } catch (error: any) {
@@ -241,7 +246,7 @@ export const subscribeToBlocks = (pageId: string, callback: (blocks: any[]) => v
   const q = query(
     collection(db, BLOCKS_COLLECTION),
     where('pageId', '==', pageId),
-    orderBy('createdAt', 'asc')
+    orderBy('order', 'asc')
   );
   return onSnapshot(q, (snapshot) => {
     const blocks = snapshot.docs.map((doc) => ({

@@ -1,5 +1,6 @@
+import { EmptyState, Illustrations } from './ui/empty-state';
 import React, { useState } from 'react';
-import { Plus, Search, Settings, Menu, X, FileText, Home, Star, Trash2 } from 'lucide-react';
+import { Plus, Search, Settings, X, Home, Star, Trash2 } from 'lucide-react';
 import { Page } from '../types/workspace';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -46,11 +47,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar */}
       <motion.aside
         initial={false}
-        animate={{
-          x: sidebarOpen ? 0 : -280,
-        }}
+        animate={{ x: sidebarOpen ? 0 : -280 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#f7f6f3] dark:bg-[#1e1e1e] border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen`}
+        className="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#f7f6f3] dark:bg-[#1e1e1e] border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen"
       >
         {/* Header */}
         <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -118,21 +117,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Pages
             </div>
+
             {filteredPages.length === 0 ? (
-              <div className="text-center py-8 px-2">
-                <FileText size={32} className="mx-auto text-gray-300 dark:text-gray-600 mb-2" />
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  {searchQuery ? 'No pages found' : 'No pages yet'}
-                </p>
-                {!searchQuery && (
-                  <button
-                    onClick={onAddPage}
-                    className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    Create your first page
-                  </button>
-                )}
-              </div>
+              <EmptyState
+                title={searchQuery ? "No pages found" : "No Pages Yet"}
+                description={
+                  searchQuery
+                    ? "Try a different search term."
+                    : "You haven’t created any pages yet. Let’s get started!"
+                }
+                ctaText={!searchQuery ? "Create Page" : "Clear Search"}
+                onClick={!searchQuery ? onAddPage : () => setSearchQuery('')}
+                illustration={Illustrations.NoPages}
+              />
             ) : (
               <div className="space-y-0.5">
                 {filteredPages.map((page) => (
